@@ -93,7 +93,6 @@ void chg_dir () {
     if (chdir(path_clone) == 0) {
         free(door.path);
         door.path = getcwd(NULL, 0);
-        clr_content();
         door.crsr_sel = 1;
     }
 
@@ -107,7 +106,6 @@ void chg_dir_back () {
     if (chdir(door.path) == 0) {
         free(door.path);
         door.path = getcwd(NULL, 0);
-        clr_content();
         door.crsr_sel = 1;
     }
 }

@@ -1,13 +1,14 @@
 #include "core.h"
 #include "render.h"
+#include <math.h>
+#include <stdio.h>
+#include <unistd.h>
 
 void draw_header () {
     int extra_save = door.crsr_col;
 
-    save_crsr();
-
     set_crsr(1, 1);
-    write(STDOUT_FILENO, "\033[30m\033[47m", 10);
+    write(STDOUT_FILENO, "\033[30;47m", 9);
 
     char p;
     for (int c = 0; c < door.crsr_col_max; c++) {
@@ -15,9 +16,9 @@ void draw_header () {
         else p = ' ';
 
         if (door.crsr_sel == 0 && c == extra_save - 1) {
-            write(STDOUT_FILENO, "\033[37m\033[40m", 10);
+            write(STDOUT_FILENO, "\033[37;40m", 9);
             write(STDOUT_FILENO, &p, 1);
-            write(STDOUT_FILENO, "\033[30m\033[47m", 10);
+            write(STDOUT_FILENO, "\033[30;47m", 9);
         }
         else {
             write(STDOUT_FILENO, &p, 1);
@@ -27,13 +28,9 @@ void draw_header () {
 
     printf("\033[0m");
     fflush(stdout);
-
-    restore_crsr();
 }
 
 void clr_content () {
-    save_crsr();
-
     set_crsr(3, 1);
 
     for (int r = 3; r < door.crsr_row_max - 3; r++) {
@@ -42,32 +39,60 @@ void clr_content () {
     }
 
     fflush(stdout);
-
-    restore_crsr();
 }
 
 void draw_content () {
-    save_crsr();
-
     get_dir_cntnt();
 
     set_crsr(3, 1);
 
-    for (int r = 3; r < door.crsr_row_max - 3 && r < door.dir_cntnt_len + 3; r++) {
-        if (r - 2 == door.crsr_sel) printf("\033[30m\033[47m");
-        printf("%s\033[0m", door.dir_cntnt[r - 3]);
+    int page_max = door.crsr_row_max - 7;
+    int page = ceil((door.crsr_sel - 1) / page_max);
+
+    for (int r = 0; r < page_max && r < door.dir_cntnt_len - page * page_max; r++) {
+        if (r == (door.crsr_sel - 1) - page * page_max) printf("\033[1;32m");
+        printf("%s\033[0m", door.dir_cntnt[r + page * page_max]);
         mv_crsr(1, 0);
     }
 
     fflush(stdout);
+}
 
-    restore_crsr();
+void draw_status () {
+    set_crsr(door.crsr_row_max - 3, 1);
+    
+    for (int c = 0; c < door.crsr_col_max; c++) {
+        write(STDOUT_FILENO, " ", 1);
+        mv_crsr(0, 1);
+    }
+
+    set_crsr(door.crsr_row_max - 3, 1);
+
+    int page_max = door.crsr_row_max - 7;
+    int page = ceil(door.crsr_sel / (page_max + 1)) + 1;
+    int pages = ceil(door.dir_cntnt_len / (page_max + 1)) + 1;
+
+    if (door.crsr_sel > 0 && door.crsr_sel < door.crsr_sel_max) {
+        printf("page %d/%d - item \033[32m%d\033[0m/%d", page, pages, door.crsr_sel, door.dir_cntnt_len);
+    }
+    else {
+        printf("page %d/%d - item -/%d", page, pages, door.dir_cntnt_len);
+    }
+
+    fflush(stdout);
+}
+
+void draw_help () {
+    set_crsr(door.crsr_row_max - 2, 1);
+
+    printf("\033[35mq\033[0muit \033[35mb\033[0mack \033[35mp\033[0math \033[35mc\033[0mommand \033[35m\u2191\033[0mup \033[35m\u2193\033[0mdown \033[35m\u2190\033[0mleft \033[35m\u2192\033[0mright \033[35m\u21B5\033[0mgo");
+
+    fflush(stdout);
 }
 
 void draw_footer () {
-    save_crsr();
-
     set_crsr(door.crsr_row_max, 1);
+
     write(STDOUT_FILENO, "\033[30m\033[47m", 10);
 
     for (int c = 0; c < door.crsr_col_max; c++) {
@@ -81,12 +106,15 @@ void draw_footer () {
     }
 
     write(STDOUT_FILENO, "\033[0m", 4);
-
-    restore_crsr();
 }
 
 void render () {
+    save_crsr();
     draw_header();
+    clr_content();
     draw_content();
+    draw_status();
+    draw_help();
     draw_footer();
+    restore_crsr();
 }

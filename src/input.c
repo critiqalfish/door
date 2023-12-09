@@ -63,6 +63,12 @@ void input (bool * running) {
         case 'b':
             chg_dir_back();
             break;
+        case 'p':
+            door.crsr_sel = 0;
+            break;
+        case 'c':
+            door.crsr_sel = door.crsr_sel_max;
+            break;
         case '\012':
             proc_ret();
             break;
@@ -70,12 +76,5 @@ void input (bool * running) {
             proc_esc_seq();
             break;
         }
-        int tmp1 = door.crsr_row;
-        int tmp2 = door.crsr_col;
-        save_crsr();
-        set_crsr(door.crsr_row_max - 1, 1);
-        printf("sel: %d", door.crsr_sel);
-        fflush(stdout);
-        restore_crsr();
     }
 }

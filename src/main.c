@@ -28,10 +28,11 @@ int main (int argc, char * argv[]) {
     hide_dflt_crsr();
     set_crsr(1, strlen(door.path));
 
-    loop();    
+    loop();
 
     clr_scr();
     set_crsr(1, 1);
+    show_dflt_crsr();
     reset_term_settings(&old_term_settings);
     chdir(base_dir);
     free(door.path);
