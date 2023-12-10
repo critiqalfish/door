@@ -17,16 +17,15 @@ int main (int argc, char * argv[]) {
     door.path = getcwd(NULL, 0);
     base_dir = (char *) malloc(strlen(door.path) * sizeof(char *) + 1);
     strcpy(base_dir, door.path);
-    door.crsr_row = 1;
-    door.crsr_col = 1;
 
     get_term_settings(&old_term_settings);
     set_term_raw_mode(&old_term_settings);
     get_term_size();
-
+    
     clr_scr();
     hide_dflt_crsr();
     set_crsr(1, strlen(door.path));
+    door.sel_mode = SEL_BROWSER;
 
     loop();
 

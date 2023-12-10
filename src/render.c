@@ -1,8 +1,5 @@
 #include "core.h"
 #include "render.h"
-#include <math.h>
-#include <stdio.h>
-#include <unistd.h>
 
 void draw_header () {
     int extra_save = door.crsr_col;
@@ -41,13 +38,13 @@ void clr_content () {
     fflush(stdout);
 }
 
-void draw_content () {
+void draw_content_browser () {
     get_dir_cntnt();
 
     set_crsr(3, 1);
 
     int page_max = door.crsr_row_max - 7;
-    int page = ceil((door.crsr_sel - 1) / page_max);
+    int page = ceil((door.crsr_sel - 1) / page_max); // NOLINT: because im smarter than cland-tidy
 
     for (int r = 0; r < page_max && r < door.dir_cntnt_len - page * page_max; r++) {
         if (r == (door.crsr_sel - 1) - page * page_max) printf("\033[1;32m");
@@ -56,6 +53,27 @@ void draw_content () {
     }
 
     fflush(stdout);
+}
+
+void draw_content_entry_sel () {
+    get_dir_cntnt();
+
+    set_crsr(3, 1);
+
+    
+}
+
+void draw_content () {
+    switch (door.sel_mode) {
+    case SEL_BROWSER:
+        draw_content_browser();
+        break;
+    case SEL_ENTRY:
+        draw_content_entry_sel();
+        break;
+    default:
+        break;
+    }
 }
 
 void draw_status () {
@@ -69,8 +87,8 @@ void draw_status () {
     set_crsr(door.crsr_row_max - 3, 1);
 
     int page_max = door.crsr_row_max - 7;
-    int page = ceil(door.crsr_sel / (page_max + 1)) + 1;
-    int pages = ceil(door.dir_cntnt_len / (page_max + 1)) + 1;
+    int page = ceil(door.crsr_sel / (page_max + 1)) + 1; // NOLINT: because im smarter than cland-tidy
+    int pages = ceil(door.dir_cntnt_len / (page_max + 1)) + 1; // NOLINT: because im smarter than cland-tidy
 
     if (door.crsr_sel > 0 && door.crsr_sel < door.crsr_sel_max) {
         printf("page %d/%d - item \033[32m%d\033[0m/%d", page, pages, door.crsr_sel, door.dir_cntnt_len);

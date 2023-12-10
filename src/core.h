@@ -8,6 +8,14 @@
 #include <termios.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <math.h>
+
+enum sel_mode {
+    SEL_PATH,
+    SEL_BROWSER,
+    SEL_ENTRY,
+    SEL_COMMAND
+};
 
 extern struct door {
     int crsr_row;
@@ -22,6 +30,8 @@ extern struct door {
     char * path;
     char ** dir_cntnt;
     int dir_cntnt_len;
+
+    enum sel_mode sel_mode; 
 } door;
 
 void pass_door(struct door * door_ref);
