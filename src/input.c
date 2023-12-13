@@ -11,7 +11,7 @@ void proc_arr_key (char * key) {
             door.sel_mode = SEL_BROWSER;
             break;
         case 'C':
-            if (door.crsr_col < door.crsr_col_max) mv_crsr(0, 1);
+            if (door.crsr_col < door.crsr_col_max && door.crsr_col < strlen(door.path)) mv_crsr(0, 1);
             break;
         case 'D':
             if (door.crsr_col > 1) mv_crsr(0, -1);

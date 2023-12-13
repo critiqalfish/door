@@ -2,8 +2,6 @@
 #include "render.h"
 
 void draw_header () {
-    int extra_save = door.crsr_col;
-
     set_crsr(1, 1);
     write(STDOUT_FILENO, "\033[30;47m", 9);
 
@@ -12,7 +10,7 @@ void draw_header () {
         if (c < strlen(door.path)) p = door.path[c];
         else p = ' ';
 
-        if (door.sel_mode == SEL_PATH && c == extra_save - 1) {
+        if (door.sel_mode == SEL_PATH && c == door.crsr_c_sv - 1) {
             write(STDOUT_FILENO, "\033[37;40m", 9);
             write(STDOUT_FILENO, &p, 1);
             write(STDOUT_FILENO, "\033[30;47m", 9);
@@ -61,6 +59,8 @@ void draw_content_entry_sel () {
     set_crsr(3, 1);
 
     printf("\033[1;32m%s\033[0m", door.dir_cntnt[door.crsr_sel]->name);
+
+    fflush(stdout);
 }
 
 void draw_content () {
