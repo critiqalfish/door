@@ -2,47 +2,64 @@
 #include "input.h"
 
 void proc_arr_key (char * key) {
-    if (door.sel_mode == SEL_BROWSER) {
+    if (door.sel_mode == SEL_PATH) {
         switch (*key) {
         case 'A':
-            mv_sel_crsr(-1);
-            if (door.crsr_sel == 0) set_crsr(1, strlen(door.path));
             break;
         case 'B':
-            mv_sel_crsr(1);
-            if (door.crsr_sel == door.crsr_sel_max) set_crsr(door.crsr_sel_max, 1);
+            set_sel_crsr(0);
+            door.sel_mode = SEL_BROWSER;
             break;
         case 'C':
-            if (door.crsr_sel > 0 && door.crsr_sel < door.crsr_sel_max) {
-                set_sel_crsr(door.crsr_sel_max - 1);
-            }
-            else {
-                mv_crsr(door.crsr_row, 1);
-            }
+            if (door.crsr_col < door.crsr_col_max) mv_crsr(0, 1);
             break;
         case 'D':
-            if (door.crsr_sel > 0 && door.crsr_sel < door.crsr_sel_max){
-                set_sel_crsr(1);
-            }
-            else {
-                mv_crsr(door.crsr_row, -1);
-            }
+            if (door.crsr_col > 1) mv_crsr(0, -1);
+            break;
+        }
+    }
+    else if (door.sel_mode == SEL_BROWSER) {
+        switch (*key) {
+        case 'A':
+            if (door.crsr_sel == 0) door.sel_mode = SEL_PATH;
+            mv_sel_crsr(-1);
+            break;
+        case 'B':
+            if (door.crsr_sel == door.crsr_sel_max) door.sel_mode = SEL_COMMAND;
+            mv_sel_crsr(1);
+            break;
+        case 'C':
+            set_sel_crsr(door.crsr_sel_max);
+            break;
+        case 'D':
+            set_sel_crsr(0);
+            break;
+        }
+    }
+    else if (door.sel_mode == SEL_ENTRY) {
+        
+    }
+    else if (door.sel_mode == SEL_COMMAND) {
+        switch (*key) {
+        case 'A':
+            set_sel_crsr(door.crsr_sel_max);
+            door.sel_mode = SEL_BROWSER;
+            break;
+        case 'B':
+            break;
+        case 'C':
+            break;
+        case 'D':
             break;
         }
     }
 }
 
 void proc_ret () {
-    if (door.crsr_sel == 0) {
-
-    }
-    else if (door.crsr_sel == door.crsr_sel_max) {
-
-    }
-    else if (conv_d_type(door.dir_cntnt[door.crsr_sel - 1]->type) == 'd') {
+    if (conv_d_type(door.dir_cntnt[door.crsr_sel]->type) == 'd') {
         chg_dir();
     }
-    else if (conv_d_type(door.dir_cntnt[door.crsr_sel - 1]->type) == 'f') {
+    else if (conv_d_type(door.dir_cntnt[door.crsr_sel]->type) == 'f') {
         door.sel_mode = SEL_ENTRY;
     }
 }
@@ -70,10 +87,10 @@ void input (bool * running) {
             else if (door.sel_mode == SEL_ENTRY) door.sel_mode = SEL_BROWSER;
             break;
         case 'p':
-            door.crsr_sel = 0;
+            door.sel_mode = SEL_PATH;
             break;
         case 'c':
-            door.crsr_sel = door.crsr_sel_max;
+            door.sel_mode = SEL_COMMAND;
             break;
         case '\012':
             proc_ret();

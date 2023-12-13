@@ -99,16 +99,16 @@ char conv_d_type (int type) {
 }
 
 void chg_dir () {
-    char * path_clone = malloc(strlen(door.path) + strlen(door.dir_cntnt[door.crsr_sel - 1]->name) + 2);
+    char * path_clone = malloc(strlen(door.path) + strlen(door.dir_cntnt[door.crsr_sel]->name) + 2);
 
     strcpy(path_clone, door.path);
     strcat(path_clone, "/");
-    strcat(path_clone, door.dir_cntnt[door.crsr_sel - 1]->name);
+    strcat(path_clone, door.dir_cntnt[door.crsr_sel]->name);
 
     if (chdir(path_clone) == 0) {
         free(door.path);
         door.path = getcwd(NULL, 0);
-        door.crsr_sel = 1;
+        door.crsr_sel = 0;
     }
 
     free(path_clone);
@@ -121,7 +121,7 @@ void chg_dir_back () {
     if (chdir(door.path) == 0) {
         free(door.path);
         door.path = getcwd(NULL, 0);
-        door.crsr_sel = 1;
+        door.crsr_sel = 0;
     }
 }
 
@@ -138,7 +138,7 @@ int get_dir_cntnt () {
     dir = opendir(door.path);
     door.dir_cntnt = NULL;
     door.dir_cntnt_len = 0;
-    door.crsr_sel_max = 1;
+    door.crsr_sel_max = 0;
 
     if (dir == NULL) {
         return -1;
@@ -172,7 +172,7 @@ int get_dir_cntnt () {
     free(door.dir_cntnt);
     door.dir_cntnt = temp;
     door.dir_cntnt_len = temp_count;
-    door.crsr_sel_max = door.dir_cntnt_len + 1;
+    door.crsr_sel_max = door.dir_cntnt_len - 1;
 
     return 0;
 }

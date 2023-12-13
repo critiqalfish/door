@@ -12,7 +12,7 @@ void draw_header () {
         if (c < strlen(door.path)) p = door.path[c];
         else p = ' ';
 
-        if (door.crsr_sel == 0 && c == extra_save - 1) {
+        if (door.sel_mode == SEL_PATH && c == extra_save - 1) {
             write(STDOUT_FILENO, "\033[37;40m", 9);
             write(STDOUT_FILENO, &p, 1);
             write(STDOUT_FILENO, "\033[30;47m", 9);
@@ -44,10 +44,10 @@ void draw_content_browser () {
     set_crsr(3, 1);
 
     int page_max = door.crsr_row_max - 7;
-    int page = ceil((door.crsr_sel - 1) / page_max); // NOLINT: because im smarter than clangd-tidy
+    int page = ceil((door.crsr_sel) / page_max); // NOLINT: because im smarter than clangd-tidy
 
     for (int r = 0; r < page_max && r < door.dir_cntnt_len - page * page_max; r++) {
-        if (r == (door.crsr_sel - 1) - page * page_max) printf("\033[1;32m");
+        if (r == (door.crsr_sel) - page * page_max && door.sel_mode != SEL_PATH && door.sel_mode != SEL_COMMAND) printf("\033[1;32m");
         printf("%c %s\033[0m", conv_d_type(door.dir_cntnt[r + page * page_max]->type), door.dir_cntnt[r + page * page_max]->name);
         mv_crsr(1, 0);
     }
@@ -60,19 +60,15 @@ void draw_content_entry_sel () {
 
     set_crsr(3, 1);
 
-    printf("\033[1;32m%s\033[0m", door.dir_cntnt[door.crsr_sel - 1]->name);
+    printf("\033[1;32m%s\033[0m", door.dir_cntnt[door.crsr_sel]->name);
 }
 
 void draw_content () {
-    switch (door.sel_mode) {
-    case SEL_BROWSER:
+    if (door.sel_mode == SEL_BROWSER || door.sel_mode == SEL_PATH || door.sel_mode == SEL_COMMAND) {
         draw_content_browser();
-        break;
-    case SEL_ENTRY:
+    }
+    else if (door.sel_mode == SEL_ENTRY) {
         draw_content_entry_sel();
-        break;
-    default:
-        break;
     }
 }
 
@@ -87,11 +83,11 @@ void draw_status () {
     set_crsr(door.crsr_row_max - 3, 1);
 
     int page_max = door.crsr_row_max - 7;
-    int page = ceil(door.crsr_sel / (page_max + 1)) + 1; // NOLINT: because im smarter than clangd-tidy
+    int page = ceil((door.crsr_sel + 1) / (page_max + 1)) + 1; // NOLINT: because im smarter than clangd-tidy
     int pages = ceil(door.dir_cntnt_len / (page_max + 1)) + 1; // NOLINT: because im smarter than clangd-tidy
 
-    if (door.crsr_sel > 0 && door.crsr_sel < door.crsr_sel_max) {
-        printf("page %d/%d - item \033[32m%d\033[0m/%d", page, pages, door.crsr_sel, door.dir_cntnt_len);
+    if (door.sel_mode == SEL_BROWSER) {
+        printf("page %d/%d - item \033[32m%d\033[0m/%d", page, pages, door.crsr_sel + 1, door.dir_cntnt_len);
     }
     else {
         printf("page %d/%d - item -/%d", page, pages, door.dir_cntnt_len);
@@ -114,7 +110,7 @@ void draw_footer () {
     write(STDOUT_FILENO, "\033[30m\033[47m", 10);
 
     for (int c = 0; c < door.crsr_col_max; c++) {
-        if (door.crsr_sel == door.crsr_sel_max && c == 0) {
+        if (door.sel_mode == SEL_COMMAND && c == 0) {
             write(STDOUT_FILENO, "\033[37m\033[40m \033[30m\033[47m", 21);
         }
         else {
