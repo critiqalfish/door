@@ -44,11 +44,11 @@ void draw_content_browser () {
     set_crsr(3, 1);
 
     int page_max = door.crsr_row_max - 7;
-    int page = ceil((door.crsr_sel - 1) / page_max); // NOLINT: because im smarter than cland-tidy
+    int page = ceil((door.crsr_sel - 1) / page_max); // NOLINT: because im smarter than clangd-tidy
 
     for (int r = 0; r < page_max && r < door.dir_cntnt_len - page * page_max; r++) {
         if (r == (door.crsr_sel - 1) - page * page_max) printf("\033[1;32m");
-        printf("%s\033[0m", door.dir_cntnt[r + page * page_max]);
+        printf("%c %s\033[0m", conv_d_type(door.dir_cntnt[r + page * page_max]->type), door.dir_cntnt[r + page * page_max]->name);
         mv_crsr(1, 0);
     }
 
@@ -60,7 +60,7 @@ void draw_content_entry_sel () {
 
     set_crsr(3, 1);
 
-    
+    printf("\033[1;32m%s\033[0m", door.dir_cntnt[door.crsr_sel - 1]->name);
 }
 
 void draw_content () {
@@ -87,8 +87,8 @@ void draw_status () {
     set_crsr(door.crsr_row_max - 3, 1);
 
     int page_max = door.crsr_row_max - 7;
-    int page = ceil(door.crsr_sel / (page_max + 1)) + 1; // NOLINT: because im smarter than cland-tidy
-    int pages = ceil(door.dir_cntnt_len / (page_max + 1)) + 1; // NOLINT: because im smarter than cland-tidy
+    int page = ceil(door.crsr_sel / (page_max + 1)) + 1; // NOLINT: because im smarter than clangd-tidy
+    int pages = ceil(door.dir_cntnt_len / (page_max + 1)) + 1; // NOLINT: because im smarter than clangd-tidy
 
     if (door.crsr_sel > 0 && door.crsr_sel < door.crsr_sel_max) {
         printf("page %d/%d - item \033[32m%d\033[0m/%d", page, pages, door.crsr_sel, door.dir_cntnt_len);

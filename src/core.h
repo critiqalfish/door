@@ -17,6 +17,11 @@ enum sel_mode {
     SEL_COMMAND
 };
 
+struct dir_ent {
+    char * name;
+    int type;
+};
+
 extern struct door {
     int crsr_row;
     int crsr_col;
@@ -28,7 +33,7 @@ extern struct door {
     int crsr_col_max;
 
     char * path;
-    char ** dir_cntnt;
+    struct dir_ent ** dir_cntnt;
     int dir_cntnt_len;
 
     enum sel_mode sel_mode; 
@@ -49,6 +54,7 @@ void set_sel_crsr (int sel);
 void mv_sel_crsr (int sel);
 void save_crsr ();
 void restore_crsr ();
+char conv_d_type (int type);
 void chg_dir ();
 void chg_dir_back ();
 int alph_sort_cmp (const void * a, const void * b);

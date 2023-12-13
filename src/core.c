@@ -83,12 +83,27 @@ void restore_crsr () {
     set_crsr(door.crsr_r_sv, door.crsr_c_sv);
 }
 
+char conv_d_type (int type) {
+    switch (type)
+    {
+    case 4:
+        return 'd';
+        break;
+    case 8:
+        return 'f';
+        break;
+    default:
+        return '0' + type;
+        break;
+    }
+}
+
 void chg_dir () {
-    char * path_clone = malloc(strlen(door.path) + strlen(door.dir_cntnt[door.crsr_sel - 1]) + 2);
+    char * path_clone = malloc(strlen(door.path) + strlen(door.dir_cntnt[door.crsr_sel - 1]->name) + 2);
 
     strcpy(path_clone, door.path);
     strcat(path_clone, "/");
-    strcat(path_clone, door.dir_cntnt[door.crsr_sel - 1]);
+    strcat(path_clone, door.dir_cntnt[door.crsr_sel - 1]->name);
 
     if (chdir(path_clone) == 0) {
         free(door.path);
@@ -111,9 +126,9 @@ void chg_dir_back () {
 }
 
 int alph_sort_cmp (const void * a, const void * b) {
-    const char * str1 = * (const char **) a;
-    const char * str2 = * (const char **) b;
-    return strcmp(str1, str2);
+    struct dir_ent *entryA = *(struct dir_ent **) a;
+    struct dir_ent *entryB = *(struct dir_ent **) b;
+    return strcmp(entryA->name, entryB->name);
 }
 
 int get_dir_cntnt () {
@@ -130,23 +145,29 @@ int get_dir_cntnt () {
     }
 
     while ((entry = readdir(dir)) != NULL) {
-        door.dir_cntnt = realloc(door.dir_cntnt, (door.dir_cntnt_len + 1) * sizeof(char *));
-        door.dir_cntnt[door.dir_cntnt_len] = strdup(entry->d_name);
+        door.dir_cntnt = realloc(door.dir_cntnt, (door.dir_cntnt_len + 1) * sizeof(struct dir_ent *));
+        door.dir_cntnt[door.dir_cntnt_len] = (struct dir_ent *) malloc(sizeof(struct dir_ent));
+        door.dir_cntnt[door.dir_cntnt_len]->name = strdup(entry->d_name);
+        door.dir_cntnt[door.dir_cntnt_len]->type = (int) entry->d_type;
 
         door.dir_cntnt_len++;
     }
 
     closedir(dir);
 
-    char **temp = malloc(door.dir_cntnt_len * sizeof(char *));
+    struct dir_ent **temp = malloc(door.dir_cntnt_len * sizeof(struct dir_ent *));
     int temp_count = 0;
     for (int i = 0; i < door.dir_cntnt_len; ++i) {
-        if (strcmp(door.dir_cntnt[i], ".") != 0 && strcmp(door.dir_cntnt[i], "..") != 0) {
+        if (strcmp(door.dir_cntnt[i]->name, ".") != 0 && strcmp(door.dir_cntnt[i]->name, "..") != 0) {
             temp[temp_count++] = door.dir_cntnt[i];
+        }
+        else {
+            free(door.dir_cntnt[i]->name);
+            free(door.dir_cntnt[i]);
         }
     }
 
-    qsort(temp, temp_count, sizeof(char *), alph_sort_cmp);
+    qsort(temp, temp_count, sizeof(struct dir_ent *), alph_sort_cmp);
 
     free(door.dir_cntnt);
     door.dir_cntnt = temp;
