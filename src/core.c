@@ -2,6 +2,7 @@
 #include "render.h"
 
 struct door door;
+char * entry_sel_options_names[] = {"open in nano", NULL};
 
 void get_term_settings (struct termios * term_settings) {
     tcgetattr(STDIN_FILENO, term_settings);
@@ -175,4 +176,26 @@ int get_dir_cntnt () {
     door.crsr_sel_max = door.dir_cntnt_len - 1;
 
     return 0;
+}
+
+void open_in_nano () {
+    char nano_command[256];
+    char * path = malloc(strlen(door.path) + strlen(door.dir_cntnt[door.crsr_sel]->name) + 2);
+
+    strcpy(path, door.path);
+    strcat(path, "/");
+    strcat(path, door.dir_cntnt[door.crsr_sel]->name);
+
+    snprintf(nano_command, sizeof(nano_command), "nano %s", path);
+    system(nano_command);
+
+    free(path);
+}
+
+void entry_sel_action () {
+    switch (door.crsr_entry_sel) {
+    case E_SEL_O_NANO:
+        open_in_nano();
+        break;
+    }
 }

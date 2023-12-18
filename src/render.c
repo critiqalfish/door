@@ -79,11 +79,14 @@ void draw_content_entry_sel_box () {
 
         mv_crsr(0, 1);
 
-        for (int c = 1; c < width - 2; c++) {
-            if (r == 0 || r == height - 1) write(STDOUT_FILENO, "\u2500", 4);
+        if (r == 0 || r == height - 1) {
+            for (int c = 1; c < width - 2; c++) {
+                write(STDOUT_FILENO, "\u2500", 4);
 
-            mv_crsr(0, 1);
+                mv_crsr(0, 1);
+            }
         }
+        else mv_crsr(0, width - 3);
 
         if (r == 0) write(STDOUT_FILENO, "\u2510", 4);
         else if (r == height - 1) write(STDOUT_FILENO, "\u2518", 4);
@@ -93,7 +96,10 @@ void draw_content_entry_sel_box () {
     }
 
     set_crsr(4, name_len + 2);
-    printf("\033[1;35mopen in nano\033[0m");
+    for (int n = 0; entry_sel_options_names[n] != NULL; n++) {
+        if (n == door.crsr_entry_sel) printf("\033[1;35m");
+        printf("%s\033[0m", entry_sel_options_names[n]);
+    }
 
     fflush(stdout);
 }
