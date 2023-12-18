@@ -56,11 +56,26 @@ void proc_arr_key (char * key) {
 }
 
 void proc_ret () {
-    if (conv_d_type(door.dir_cntnt[door.crsr_sel]->type) == 'd') {
+    if (door.sel_mode == SEL_BROWSER) {
+        if (conv_d_type(door.dir_cntnt[door.crsr_sel]->type) == 'd') {
         chg_dir();
+        }
+        else if (conv_d_type(door.dir_cntnt[door.crsr_sel]->type) == 'f') {
+            door.sel_mode = SEL_ENTRY;
+        }
     }
-    else if (conv_d_type(door.dir_cntnt[door.crsr_sel]->type) == 'f') {
-        door.sel_mode = SEL_ENTRY;
+    else if (door.sel_mode == SEL_ENTRY) {
+        char nano_command[256];
+        char * path = malloc(strlen(door.path) + strlen(door.dir_cntnt[door.crsr_sel]->name) + 2);
+
+        strcpy(path, door.path);
+        strcat(path, "/");
+        strcat(path, door.dir_cntnt[door.crsr_sel]->name);
+
+        snprintf(nano_command, sizeof(nano_command), "nano %s", path);
+        system(nano_command);
+
+        free(path);
     }
 }
 
