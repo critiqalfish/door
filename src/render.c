@@ -1,6 +1,8 @@
 #include "core.h"
 #include "render.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 void draw_header () {
@@ -58,7 +60,7 @@ void draw_content_browser () {
 void draw_content_entry_sel () {
     get_dir_cntnt();
 
-    set_crsr(4, 1);
+    set_crsr(3, 2);
 
     printf("\033[1;32m%s\033[0m", door.dir_cntnt[door.crsr_sel]->name);
 
@@ -66,36 +68,31 @@ void draw_content_entry_sel () {
 }
 
 void draw_content_entry_sel_box () {
-    long name_len = strlen(door.dir_cntnt[door.crsr_sel]->name) + 4;
     int width = 20;
     int height = 3 + 2;
 
-    set_crsr(3, name_len);
+    set_crsr(5, 1);
 
     for (int r = 0; r < height; r++) {
-        if (r == 0) write(STDOUT_FILENO, "\u250C", 4);
-        else if (r == height - 1) write(STDOUT_FILENO, "\u2514", 4);
-        else write(STDOUT_FILENO, "\u2502", 4);
+        for (int c = 0; c < width; c++) {
+            char* towrite;
 
-        mv_crsr(0, 1);
+            if (r == 0 && c == 0) towrite = "\u250C";
+            else if (r == 0 && c == width - 1) towrite = "\u2510";
+            else if (r == height - 1 && c == 0) towrite = "\u2514";
+            else if (r == height - 1 && c == width - 1) towrite = "\u2518";
 
-        if (r == 0 || r == height - 1) {
-            for (int c = 1; c < width - 2; c++) {
-                write(STDOUT_FILENO, "\u2500", 4);
+            else if (r == 0 || r == height - 1) towrite = "\u2500";
+            else if (c == 0 || c == width - 1) towrite = "\u2502";
+            else towrite = "";
 
-                mv_crsr(0, 1);
-            }
+            write(STDOUT_FILENO, towrite, 4);
+            mv_crsr(0, 1);
         }
-        else mv_crsr(0, width - 3);
-
-        if (r == 0) write(STDOUT_FILENO, "\u2510", 4);
-        else if (r == height - 1) write(STDOUT_FILENO, "\u2518", 4);
-        else write(STDOUT_FILENO, "\u2502", 4);
-
-        set_crsr(r + 4, name_len);
+        mv_crsr(1, -width);
     }
 
-    set_crsr(4, name_len + 2);
+    set_crsr(6, 2);
     for (int n = 0; entry_sel_options_names[n] != NULL; n++) {
         if (n == door.crsr_entry_sel) printf("\033[1;35m");
         printf("%s\033[0m", entry_sel_options_names[n]);
